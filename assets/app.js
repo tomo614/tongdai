@@ -288,20 +288,24 @@
         (hasMet ? '<b>' + fmtYear(p.met) + '</b>' : '<b>年月失载</b>') +
         (sub ? '<em>' + esc(sub) + '</em>' : '') + '</div>';
     }
-    var body = '';
-    if (hasEv) {
-      body += p.ev.map(function (v) {
-        var y = (v.y === null || v.y === undefined) ? '' : fmtYear(v.y);
-        return '<div class="ev-i"><span class="ev-d"></span>' +
-          '<span class="ev-y">' + esc(y) + '</span>' +
-          '<span class="ev-t">' + esc(v.e) + '</span></div>';
-      }).join('');
-    }
-    if (p.end) {
-      body += '<div class="ev-i is-end"><span class="ev-d"></span>' +
-        '<span class="ev-y">' + esc(fmtYear(p.end)) + '</span>' +
-        '<span class="ev-t">' + esc(p.endWhy || '关系终结') + '</span></div>';
-    }
+    var rows = (p.ev || []).map(function (v) {
+      return { y: (v.y === null || v.y === undefined) ? null : v.y, t: v.e, end: false };
+    });
+    if (p.end) rows.push({ y: p.end, t: p.endWhy || '关系终结', end: true });
+
+    // 按年份排序；年份失载的排在最前，避免打断时间线
+    rows.sort(function (x, y) {
+      if (x.y === null && y.y === null) return 0;
+      if (x.y === null) return -1;
+      if (y.y === null) return 1;
+      return x.y - y.y;
+    });
+
+    var body = rows.map(function (v) {
+      return '<div class="ev-i' + (v.end ? ' is-end' : '') + '"><span class="ev-d"></span>' +
+        '<span class="ev-y">' + (v.y === null ? '' : esc(fmtYear(v.y))) + '</span>' +
+        '<span class="ev-t">' + esc(v.t) + '</span></div>';
+    }).join('');
     return h + '<div class="ev-body">' + body + '</div></div>';
   }
 

@@ -276,7 +276,7 @@ window.AUTHORS = (window.AUTHORS || []).concat([
   works: ["尤利西斯", "都柏林人", "青年艺术家的画像", "芬尼根的守灵夜"],
   peers: [
     {
-      n: "伍尔夫", e: "Virginia Woolf", b: 1882, d: 1941, c: "英国", f: "小说", t: "rival",
+      n: "弗吉尼亚·伍尔夫", e: "Virginia Woolf", b: 1882, d: 1941, c: "英国", f: "小说", t: "rival",
       r: "同年生同年卒，又敬又厌",
       met: null, metAt: "具体年月失载：一生只在伦敦的聚会上见过数面",
       ev: [
@@ -1018,7 +1018,7 @@ window.AUTHORS = (window.AUTHORS || []).concat([
       x: "现代主义最著名的一次编辑：庞德把《荒原》砍掉一半，留下的每一行都更硬。艾略特把那句题献印在扉页上，一生没有改口。他后来说：那首诗的作者其实有两个人。"
     },
     {
-      n: "伍尔夫", e: "Virginia Woolf", b: 1882, d: 1941, c: "英国", f: "小说", t: "friend",
+      n: "弗吉尼亚·伍尔夫", e: "Virginia Woolf", b: 1882, d: 1941, c: "英国", f: "小说", t: "friend",
       r: "霍加斯出版社的出版人",
       met: 1918, metAt: "伦敦，霍加斯宅的茶桌上",
       ev: [

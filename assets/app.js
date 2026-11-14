@@ -230,18 +230,21 @@
       }).join('');
     }
 
+    var peopleCount = Object.keys(people).length;
+
     el.innerHTML =
       '<div class="home">' +
       '<p class="eyebrow">输入一个名字 · 看见一整个时代</p>' +
       '<h1>同代<em>。</em></h1>' +
       '<p class="lede">输入任意一位作家——<b>古今中外都可以</b>——立刻看到与 TA 同时代的所有著名人物：' +
-      '诗人、哲人、科学家、画家、君王。有关系的人写明是什么关系，<b>没有关系的也照实列出</b>，标注“同代无交集”。</p>' +
+      '诗人、哲人、科学家、画家、君王。每一段关系都写明<b>什么时候认识、交往中发生了什么</b>，' +
+      '连<b>绝交</b>也一并记下；确实没有交集的，照实列出，标注“同代无交集”。</p>' +
       '<div class="quick" id="quick">' +
       ['李白', '苏轼', '鲁迅', '张爱玲', '莎士比亚', '歌德', '托尔斯泰', '卡夫卡', '马尔克斯', '村上春树']
         .map(function (n) { return '<button class="q-chip" data-q="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="q-chip" data-random="1">随便看一位 →</button>' +
       '</div>' +
-      '<p class="hint">共收录 ' + AUTHORS.length + ' 位作家 · 每位列出 10–18 位同时代人物 · 输入同代人物的名字也可以反查</p>' +
+      '<p class="hint">共收录 ' + AUTHORS.length + ' 位作家 · ' + peopleCount + ' 位时代人物 · 每位作家 10–16 位同代人 · 每段关系都写明相识时间与交往大事（绝交也记）</p>' +
 
       '<div class="section-head"><h2>中国作家</h2><span>' + cn.length + ' 位</span></div>' +
       '<div class="lib-grid">' + lib(cn) + '</div>' +
@@ -268,6 +271,38 @@
     el.querySelectorAll('.lib-item').forEach(function (b) {
       b.addEventListener('click', function () { location.hash = 'a/' + b.dataset.id; });
     });
+  }
+
+  /* ---------- 交往年表 ---------- */
+  function evBlock(p) {
+    if (p.t === 'none') return '';
+    var hasMet = p.met !== null && p.met !== undefined;
+    var hasEv = p.ev && p.ev.length;
+    if (!hasMet && !hasEv && !p.end) return '';
+    var h = '<div class="ev">';
+    var sub = p.metAt || '';
+    if (!hasMet && /失载|不详|不明/.test(sub)) {
+      h += '<div class="ev-head"><span class="k">相识</span><em>' + esc(sub) + '</em></div>';
+    } else {
+      h += '<div class="ev-head"><span class="k">相识</span>' +
+        (hasMet ? '<b>' + fmtYear(p.met) + '</b>' : '<b>年月失载</b>') +
+        (sub ? '<em>' + esc(sub) + '</em>' : '') + '</div>';
+    }
+    var body = '';
+    if (hasEv) {
+      body += p.ev.map(function (v) {
+        var y = (v.y === null || v.y === undefined) ? '' : fmtYear(v.y);
+        return '<div class="ev-i"><span class="ev-d"></span>' +
+          '<span class="ev-y">' + esc(y) + '</span>' +
+          '<span class="ev-t">' + esc(v.e) + '</span></div>';
+      }).join('');
+    }
+    if (p.end) {
+      body += '<div class="ev-i is-end"><span class="ev-d"></span>' +
+        '<span class="ev-y">' + esc(fmtYear(p.end)) + '</span>' +
+        '<span class="ev-t">' + esc(p.endWhy || '关系终结') + '</span></div>';
+    }
+    return h + '<div class="ev-body">' + body + '</div></div>';
   }
 
   /* ---------- detail ---------- */
@@ -298,7 +333,9 @@
     var step = niceStep(span / 6.5);
     var ticks = '';
     for (var t = Math.ceil(minY / step) * step; t <= maxY; t += step) {
-      ticks += '<b style="left:' + pct(t).toFixed(2) + '%">' + fmtYear(t) + '</b>';
+      var tp = pct(t);
+      if (tp < 3 || tp > 92) continue;
+      ticks += '<b style="left:' + tp.toFixed(2) + '%">' + fmtYear(t) + '</b>';
     }
 
     var items = rows.map(function (x) {
@@ -319,6 +356,7 @@
     }).join('');
 
     var hasRel = a.peers.filter(function (p) { return p.t !== 'none'; }).length;
+    var evN = a.peers.filter(function (p) { return p.t !== 'none' && p.ev && p.ev.length; }).length;
     var crossN = a.peers.filter(function (p) { return p.c && p.c.indexOf('中国') !== 0; }).length;
     var eraSpan = maxY - minY;
 
@@ -361,7 +399,7 @@
         '<span class="badge t-' + p.t + '">' + (TYPE_SHORT[p.t] || '同代') + '</span></div>' +
         '<div class="card-meta"><span>' + lifeText(p) + '</span><span>' + esc(p.c || '') + '</span><span>' + esc(p.f || '') + '</span></div>' +
         '<div class="rel">' + esc(p.r) + '</div>' +
-        '<p class="x">' + esc(p.x) + '</p>' + body +
+        '<p class="x">' + esc(p.x) + '</p>' + evBlock(p) + body +
         (ta ? '<a class="jump" href="#a/' + ta.id + '">查看 TA 的主页 →</a>' : '') +
         '</article>';
     }).join('');
@@ -390,6 +428,7 @@
       '<div class="stats">' +
       '<div class="stat"><b>' + a.peers.length + '</b><span>同代人物</span></div>' +
       '<div class="stat"><b>' + hasRel + '</b><span>有直接关系</span></div>' +
+      '<div class="stat"><b>' + evN + '</b><span>交往年表</span></div>' +
       '<div class="stat"><b>' + eraSpan + '</b><span>跨度（年）</span></div>' +
       '</div>' +
 
@@ -413,7 +452,8 @@
 
       '<div class="note"><b>关于“同时代”：</b>此处收录的是与 ' + esc(a.name) + ' 生命期有重叠的著名人物，' +
       '不限文学，包含思想、科学、艺术与权力人物。凡无直接交往或影响关系的，一律标注“同代无交集”，并说明他们各自在做什么。<br>' +
-      '<b>数据说明：</b>人工整理，生卒年取通行说法；带“约”者为学界尚有争议的年代。</div>' +
+      '<b>交往年表：</b>每张卡片下方的“相识”是该年两人首次见面的年份与地点，其下按时间列出交往中的大事；若关系以绝交、反目或决裂收场，会用红点单独标出。<br>'+
+      '<b>数据说明：</b>人工整理，生卒年取通行说法；带“约”者为学界尚有争议的年代。年月失载处写“年月失载”，不作推测。</div>' +
       '</div>';
 
     // interactions
@@ -488,7 +528,7 @@
           '<div class="card-h"><h3 class="nm">' + esc(a.name) + '<span class="en">' + lifeText(a) + ' · ' + esc(a.field) + '</span></h3>' +
           '<span class="badge t-' + peer.t + '">' + (TYPE_SHORT[peer.t] || '同代') + '</span></div>' +
           '<div class="rel">' + esc(peer.r) + '</div>' +
-          '<p class="x">' + esc(peer.x) + '</p>' +
+          '<p class="x">' + esc(peer.x) + '</p>' + evBlock(peer) +
           '<a class="jump" href="#a/' + a.id + '">打开 ' + esc(a.name) + ' 的同代星图 →</a>' +
           '</article>';
       }).join('') + '</div>' +

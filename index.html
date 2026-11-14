@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>同代 · 一个作家的同时代人</title>
+<meta name="description" content="输入任意一位作家，立刻看到与 TA 同时代的著名人物：诗人、哲人、科学家、画家、君王，以及他们之间的关系。古今中外通用。">
+<meta name="theme-color" content="#f7f4ed">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#"><span class="dot"></span>同代<span class="en">Contemporaries</span></a>
+    <div class="searchbox">
+      <form id="searchForm" autocomplete="off" role="search">
+        <svg width="15" height="15" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="8.6" cy="8.6" r="5.6" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M13 13l3.6 3.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+        <input id="q" type="search" name="q" placeholder="输入作家名字：李白 / 张爱玲 / Shakespeare" aria-label="输入作家名字">
+        <button class="btn-go" type="submit">查询</button>
+      </form>
+      <div class="suggest" id="suggest"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="home" class="view"></section>
+  <section id="detail" class="view hidden"></section>
+  <section id="cross" class="view hidden"></section>
+</main>
+
+<footer>
+  同代 · 一个作家的同时代人
+  <span class="dot-sep">·</span> 人物与关系为人工整理，仅供阅读参考
+  <span class="dot-sep">·</span> 按 <kbd style="font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 4px">/</kbd> 快速搜索
+</footer>
+
+<noscript><p style="text-align:center;padding:40px">需要开启 JavaScript 才能使用。</p></noscript>
+
+<script src="data/cn-a.js"></script>
+<script src="data/cn-b.js"></script>
+<script src="data/cn-c.js"></script>
+<script src="data/w-a.js"></script>
+<script src="data/w-b.js"></script>
+<script src="data/w-c.js"></script>
+<script src="data/w-d.js"></script>
+<script src="data/w-e.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

@@ -334,7 +334,8 @@
     function pct(y) { return (y - minY) / span * 100; }
 
     // axis ticks
-    var step = niceStep(span / 6.5);
+    // 窄屏刻度少一半，避免四位数年份挤在一起
+    var step = niceStep(span / (window.innerWidth < 560 ? 5.5 : 6.5));
     var ticks = '';
     for (var t = Math.ceil(minY / step) * step; t <= maxY; t += step) {
       var tp = pct(t);

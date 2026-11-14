@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DIR = path.join(__dirname, '..', 'data');
-const FILES = ['cn-a', 'cn-b', 'cn-c', 'cn-d', 'cn-e', 'cn-f', 'w-a', 'w-b', 'w-c', 'w-d', 'w-e'];
+const FILES = fs.readdirSync(DIR).filter(f => f.endsWith('.js')).map(f => f.slice(0, -3)).sort();
 const TYPES = new Set(['friend', 'rival', 'mentor', 'family', 'circle', 'patron', 'context', 'influence', 'none']);
 
 global.window = {};

@@ -42,7 +42,8 @@ entries, changed = [], []
 for path in local:
     if not os.path.exists(path):
         continue
-    sha = sh("git", "hash-object", path).strip()
+    # --no-filters：按磁盘原始字节取 hash，才能和远端 blob 真实比对（否则 CRLF 归一化会让每个文件都判为“已变更”）
+    sha = sh("git", "hash-object", "--no-filters", path).strip()
     if remote.get(path) == sha:
         continue
     blob = call("POST", "/repos/%s/git/blobs" % REPO,

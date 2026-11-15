@@ -6,3 +6,4 @@ node_modules/
 _test/
 shot-*.png
 tmp-*.js
+.dev/.token

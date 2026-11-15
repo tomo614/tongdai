@@ -6,7 +6,9 @@ import base64, json, os, subprocess, sys, urllib.request
 
 REPO = "tomo614/tongdai"
 API = "https://api.github.com"
-TOKEN = os.environ["TOKEN"]
+# Token：优先取环境变量 TOKEN，否则读 .dev/.token（该文件已被 .gitignore 忽略）
+_here = os.path.dirname(os.path.abspath(__file__))
+TOKEN = os.environ.get("TOKEN") or open(os.path.join(_here, ".token")).read().strip()
 MSG = sys.argv[1] if len(sys.argv) > 1 else "update"
 
 

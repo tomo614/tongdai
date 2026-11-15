@@ -298,6 +298,46 @@ a { color: inherit; text-decoration: none; }
 
 .section-head span { font-size: 12.5px; color: var(--muted); }
 
+/* 国家筛选 */
+.country-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 16px;
+}
+
+.c-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  background: var(--paper-2);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .16s;
+}
+
+.c-chip i {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.c-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+.c-chip.on {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+
+.c-chip.on i { color: color-mix(in srgb, var(--paper) 72%, transparent); }
+
 .lib-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));

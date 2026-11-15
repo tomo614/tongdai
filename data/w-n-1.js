@@ -595,7 +595,7 @@ window.AUTHORS = (window.AUTHORS || []).concat([
   ]
 },
 {
-  id: "taha", name: "塔哈·侯赛因", en: "Taha Hussein", alias: ["塔哈·侯赛因", "埃及的盲哲"],
+  id: "taha", name: "塔哈·侯赛因", en: "Taha Hussein", alias: ["盲者塔哈", "埃及的盲哲"],
   birth: 1889, death: 1973,
   country: "埃及 · 明亚", era: "阿拉伯文艺复兴", field: "小说",
   bio: "三岁失明，十三岁进爱资哈尔，后来在巴黎写博士论文，成了埃及现代文学的立法者。1926年他考证前伊斯兰诗歌多为后人伪造，被宗教界告上法庭；1950年他做教育部长，让穷孩子免费上学。他一生在做同一件事：把阿拉伯语从背诵里解放出来。",

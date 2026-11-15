@@ -48,6 +48,14 @@
     return Math.min(A.d, P.d) - Math.max(A.b, P.b);
   }
 
+  /* 国家归一：取「·」或「/」前的主国名，用于按国别浏览 */
+  var COUNTRY_ALIAS = { '苏联': '俄国', '北爱尔兰': '爱尔兰', '捷克斯洛伐克': '捷克' };
+  function countryKey(a) {
+    var s = String(a.country || '').split(/[·/／]/)[0].trim();
+    if (COUNTRY_ALIAS[s]) s = COUNTRY_ALIAS[s];
+    return s || '其他';
+  }
+
   /* ---------- indexes ---------- */
   var byName = {};
   AUTHORS.forEach(function (a) {
@@ -217,10 +225,23 @@
   function renderHome() {
     var el = document.getElementById('home');
     if (el.dataset.done) return;
-    var cn = AUTHORS.filter(function (a) { return (a.country || '').indexOf('中国') === 0; })
-      .sort(function (x, y) { return x.birth - y.birth; });
-    var wd = AUTHORS.filter(function (a) { return (a.country || '').indexOf('中国') !== 0; })
-      .sort(function (x, y) { return x.birth - y.birth; });
+
+    var groups = {};
+    AUTHORS.forEach(function (a) {
+      var k = countryKey(a);
+      (groups[k] = groups[k] || []).push(a);
+    });
+    var keys = Object.keys(groups).sort(function (x, y) {
+      if (x === '中国') return -1;
+      if (y === '中国') return 1;
+      return groups[y].length - groups[x].length || (x < y ? -1 : 1);
+    });
+    keys.forEach(function (k) {
+      groups[k].sort(function (x, y) { return x.birth - y.birth; });
+    });
+
+    var sel = '中国';
+    var peopleCount = Object.keys(people).length;
 
     function lib(list) {
       return list.map(function (a) {
@@ -229,36 +250,50 @@
           '<span class="li-m">' + lifeText(a) + ' · ' + esc(a.field) + '</span></button>';
       }).join('');
     }
-
-    var peopleCount = Object.keys(people).length;
+    function chips() {
+      return keys.map(function (k) {
+        return '<button class="c-chip' + (k === sel ? ' on' : '') + '" data-c="' + esc(k) + '">' +
+          esc(k) + '<i>' + groups[k].length + '</i></button>';
+      }).join('');
+    }
 
     el.innerHTML =
       '<div class="home">' +
       '<p class="eyebrow">输入一个名字 · 看见一整个时代</p>' +
       '<h1>同代<em>。</em></h1>' +
-      '<p class="lede">输入任意一位作家——<b>古今中外都可以</b>——立刻看到与 TA 同时代的所有著名人物：' +
-      '诗人、哲人、科学家、画家、君王。每一段关系都写明<b>什么时候认识、交往中发生了什么</b>，' +
-      '连<b>绝交</b>也一并记下；确实没有交集的，照实列出，标注“同代无交集”。</p>' +
+      '<p class="lede">输入任意一位作家——<b>古今中外都可以</b>——立刻看到与 TA 同时代的著名人物：' +
+      '<b>何时相识、交往中发生了什么、关系如何终结</b>；确无交集的也照实列出。</p>' +
       '<div class="quick" id="quick">' +
-      ['李白', '苏轼', '鲁迅', '张爱玲', '莎士比亚', '歌德', '托尔斯泰', '卡夫卡', '马尔克斯', '村上春树']
+      ['李白', '苏轼', '鲁迅', '张爱玲', '莎士比亚', '托尔斯泰', '卡夫卡', '马尔克斯', '村上春树']
         .map(function (n) { return '<button class="q-chip" data-q="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="q-chip" data-random="1">随便看一位 →</button>' +
       '</div>' +
-      '<p class="hint">共收录 ' + AUTHORS.length + ' 位作家 · ' + peopleCount + ' 位时代人物 · 每位作家 10–16 位同代人 · 每段关系都写明相识时间与交往大事（绝交也记）</p>' +
+      '<p class="hint">' + AUTHORS.length + ' 位作家 · ' + peopleCount + ' 位时代人物 · 按 <kbd style="font:inherit;border:1px solid var(--line);border-radius:4px;padding:0 4px">/</kbd> 搜索</p>' +
 
-      '<div class="section-head"><h2>中国作家</h2><span>' + cn.length + ' 位</span></div>' +
-      '<div class="lib-grid">' + lib(cn) + '</div>' +
-      '<div class="section-head"><h2>世界作家</h2><span>' + wd.length + ' 位</span></div>' +
-      '<div class="lib-grid">' + lib(wd) + '</div>' +
+      '<div class="section-head"><h2>按国家浏览</h2><span id="selCount"></span></div>' +
+      '<div class="country-chips" id="cChips"></div>' +
+      '<div class="lib-grid" id="libGrid"></div>' +
 
-      '<div class="note"><b>怎么用：</b>顶部搜索框输入名字（支持中英文、笔名、别名），回车即出结果。' +
-      '结果页会先给出“同代时间轴”，再用卡片列出每一位同时代人物及其与 TA 的关系。' +
-      '卡片下方的时间条表示两人生命重叠的长度；点击右上角标签可按“有交集 / 无交集”和领域筛选。<br>' +
-      '<b>数据说明：</b>人物与关系为人工整理，生卒年多取通行说法，部分标“约”。' +
-      '“同时代”指生命期有重叠；少数跨时代的影响者（如维吉尔之于但丁）会单独标注相隔年数。</div>' +
+      '<p class="note">人物与关系为人工整理，生卒年多取通行说法，带「约」者尚有争议；年月失载处不作推测。</p>' +
       '</div>';
 
+    function paint() {
+      el.querySelector('#cChips').innerHTML = chips();
+      el.querySelector('#libGrid').innerHTML = lib(groups[sel]);
+      el.querySelector('#selCount').textContent = groups[sel].length + ' 位';
+      el.querySelectorAll('#libGrid .lib-item').forEach(function (b) {
+        b.addEventListener('click', function () { location.hash = 'a/' + b.dataset.id; });
+      });
+    }
+
     el.dataset.done = '1';
+    paint();
+    el.querySelector('#cChips').addEventListener('click', function (e) {
+      var b = e.target.closest('.c-chip');
+      if (!b) return;
+      sel = b.dataset.c;
+      paint();
+    });
     el.querySelector('#quick').addEventListener('click', function (e) {
       var b = e.target.closest('button');
       if (!b) return;
@@ -267,9 +302,6 @@
       } else if (b.dataset.q) {
         go(b.dataset.q);
       }
-    });
-    el.querySelectorAll('.lib-item').forEach(function (b) {
-      b.addEventListener('click', function () { location.hash = 'a/' + b.dataset.id; });
     });
   }
 
@@ -455,10 +487,8 @@
 
       (related ? '<div class="block"><div class="block-head"><h2>这些同代人也在本库中</h2></div><div class="related">' + related + '</div></div>' : '') +
 
-      '<div class="note"><b>关于“同时代”：</b>此处收录的是与 ' + esc(a.name) + ' 生命期有重叠的著名人物，' +
-      '不限文学，包含思想、科学、艺术与权力人物。凡无直接交往或影响关系的，一律标注“同代无交集”，并说明他们各自在做什么。<br>' +
-      '<b>交往年表：</b>每张卡片下方的“相识”是该年两人首次见面的年份与地点，其下按时间列出交往中的大事；若关系以绝交、反目或决裂收场，会用红点单独标出。<br>'+
-      '<b>数据说明：</b>人工整理，生卒年取通行说法；带“约”者为学界尚有争议的年代。年月失载处写“年月失载”，不作推测。</div>' +
+      '<div class="note">「同时代」指生命期有重叠，不限文学；无直接交往者标注「同代无交集」并说明各自在做什么。' +
+      '卡片下方按时间列出交往大事，红点表示关系的终结（绝交、反目、决裂）。生卒年取通行说法，失载处不作推测。</div>' +
       '</div>';
 
     // interactions
@@ -537,7 +567,7 @@
           '<a class="jump" href="#a/' + a.id + '">打开 ' + esc(a.name) + ' 的同代星图 →</a>' +
           '</article>';
       }).join('') + '</div>' +
-      '<div class="note">这张“反向清单”说明：同一个人往往同时出现在好几位作家的时代里。换个角度，历史就是一张互相重叠的网。</div>';
+      '<div class="note">同一个人往往同时出现在好几位作家的时代里——历史就是一张互相重叠的网。</div>';
   }
 
   function renderNotFound(q) {

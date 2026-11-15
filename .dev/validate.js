@@ -9,11 +9,17 @@ const TYPES = new Set(['friend', 'rival', 'mentor', 'family', 'circle', 'patron'
 
 global.window = {};
 const perFile = {};
+const parseErrs = [];
 for (const f of FILES) {
   const p = path.join(DIR, f + '.js');
   if (!fs.existsSync(p)) { console.log('missing file', f); continue; }
   perFile[f] = (global.window.AUTHORS || []).length;
-  eval(fs.readFileSync(p, 'utf8'));
+  try {
+    eval(fs.readFileSync(p, 'utf8'));
+  } catch (e) {
+    // 语法错误不能让整份报告“看起来是 0 错误”，单独记一条并跳过该文件
+    parseErrs.push(f + '.js: ' + String(e.message).split('\n')[0]);
+  }
   perFile[f] = (global.window.AUTHORS || []).length - perFile[f];
 }
 const AUTHORS = global.window.AUTHORS || [];
@@ -101,7 +107,8 @@ console.log('作家 ' + AUTHORS.length + ' 位 ｜ 人物关系 ' + pairs + ' �
 console.log('交往年表：' + withEv + ' 条关系有年表，共 ' + events + ' 个事件；相识年份已知 ' + metKnown +
   ' 条；关系终结（含绝交）' + broken + ' 条');
 console.log('类型分布：' + Object.keys(byType).sort((x, y) => byType[y] - byType[x]).map(k => k + ':' + byType[k]).join('  '));
-console.log('错误 ' + errs.length + ' 条，提醒 ' + warns.length + ' 条');
+console.log('错误 ' + (errs.length + parseErrs.length) + ' 条，提醒 ' + warns.length + ' 条');
+parseErrs.forEach(e => console.log(' ERR  ' + e));
 errs.slice(0, 60).forEach(e => console.log(' ERR  ' + e));
 warns.slice(0, 25).forEach(w => console.log(' warn ' + w));
-process.exitCode = errs.length ? 1 : 0;
+process.exitCode = (errs.length + parseErrs.length) ? 1 : 0;

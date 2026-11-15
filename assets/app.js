@@ -250,11 +250,28 @@
           '<span class="li-m">' + lifeText(a) + ' · ' + esc(a.field) + '</span></button>';
       }).join('');
     }
+    function sub(title, list) {
+      return '<div class="sub-head"><h3>' + title + '</h3><span>' + list.length + ' 位</span></div>' +
+        '<div class="lib-grid">' + lib(list) + '</div>';
+    }
     function chips() {
       return keys.map(function (k) {
         return '<button class="c-chip' + (k === sel ? ' on' : '') + '" data-c="' + esc(k) + '">' +
           esc(k) + '<i>' + groups[k].length + '</i></button>';
       }).join('');
+    }
+
+    function bodyHTML() {
+      var list = groups[sel] || [];
+      if (sel === '中国') {
+        var anc = list.filter(function (a) { return a.birth < 1840; });
+        var mod = list.filter(function (a) { return a.birth >= 1840 && a.birth < 1919; });
+        var now = list.filter(function (a) { return a.birth >= 1919; });
+        return sub('中国古代 · 先秦至清中叶', anc) +
+          sub('中国近代 · 1840–1919', mod) +
+          sub('中国现代 · 1919 至今', now);
+      }
+      return '<div class="lib-grid">' + lib(list) + '</div>';
     }
 
     el.innerHTML =
@@ -279,7 +296,7 @@
 
     function paint() {
       el.querySelector('#cChips').innerHTML = chips();
-      el.querySelector('#libGrid').innerHTML = lib(groups[sel]);
+      el.querySelector('#libGrid').innerHTML = bodyHTML();
       el.querySelector('#selCount').textContent = groups[sel].length + ' 位';
       el.querySelectorAll('#libGrid .lib-item').forEach(function (b) {
         b.addEventListener('click', function () { location.hash = 'a/' + b.dataset.id; });
